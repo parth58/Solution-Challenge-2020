@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "510301305479",
+    "firebase_url": "https://solution-challenge-2020.firebaseio.com",
+    "project_id": "solution-challenge-2020",
+    "storage_bucket": "solution-challenge-2020.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:510301305479:android:98a67509daab183370d622",
+        "android_client_info": {
+          "package_name": "com.pgfinder.pg_finder"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "510301305479-uhvnt24pa5e2ik4gr4ec8tr710o7m73r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pgfinder.pg_finder",
+            "certificate_hash": "c6fd760612b563dcb91116694dc8dde2e156306b"
+          }
+        },
+        {
+          "client_id": "510301305479-egt8mtqbf45b453utrcm7fpmfnqccpph.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBT_QJO-S00zPHGH5MI-mIOvz-HPzq_u3w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "510301305479-egt8mtqbf45b453utrcm7fpmfnqccpph.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
