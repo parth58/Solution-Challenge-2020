@@ -1,9 +1,16 @@
+import 'dart:math';
+
+import 'package:pg_finder/models/owner.dart';
 import 'package:pg_finder/services/auth.dart';
 import 'package:pg_finder/shared/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:pg_finder/shared/logo.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart';
+import 'package:pg_finder/services/database.dart';
+
 //
 //class Register extends StatefulWidget {
 //
@@ -140,6 +147,7 @@ class _RegisterState extends State<Register> {
   String error = '';
   bool loading = false;
   bool complete = false;
+  bool showImageError=false;
   int _current;
 
   List<StepState> _listState;
@@ -190,6 +198,17 @@ class _RegisterState extends State<Register> {
                 setState(() => lname = val);
               },
             ),
+          ],
+        ),
+      ),
+      Step(
+        isActive:true,
+        state: _current == 1
+            ? _listState[1]
+            : _current > 1 ? _listState[2] : _listState[0],
+        title: const Text('Contact Details'),
+        content: Column(
+          children: <Widget>[
             TextFormField(
               decoration: new InputDecoration(
                   labelText: 'Email',
@@ -202,17 +221,6 @@ class _RegisterState extends State<Register> {
                 setState(() => email = val);
               },
             ),
-          ],
-        ),
-      ),
-      Step(
-        isActive:true,
-        state: _current == 1
-            ? _listState[1]
-            : _current > 1 ? _listState[2] : _listState[0],
-        title: const Text('Contact Details'),
-        content: Column(
-          children: <Widget>[
             TextFormField(
               decoration: InputDecoration(
                   labelText: 'Address1',
@@ -297,12 +305,23 @@ class _RegisterState extends State<Register> {
             Center(
               child: _image == null
                   ? Text('No image selected.')
-                  : Image(image: FileImage(_image),height: 150,width: 150,),
+                  : Image(image: FileImage(_image),height:200,width:200,fit:BoxFit.fill),
             ),
+            SizedBox(height: 10,),
             FloatingActionButton(
               onPressed: getImage,
               tooltip: 'Pick Image',
               child: Icon(Icons.add_a_photo),
+            ),
+            SizedBox(height: 10,),
+            Visibility(
+              child: Text(
+                'Please select Profile Picture',
+                style: TextStyle(
+                  color: Colors.red,
+                ),
+              ),
+              visible: showImageError,
             ),
           ],
         ),
@@ -335,7 +354,7 @@ class _RegisterState extends State<Register> {
                     color: Colors.grey,
                   )),
               obscureText: true,
-              validator: (val) => password!=val? 'Password Does Not Match!' : null,
+              validator: (val) => val.isEmpty || password!=val? 'Password Does Not Match!' : null,
               onChanged: (val) {
                 setState(() =>  cpassword= val);
               },
@@ -364,6 +383,7 @@ class _RegisterState extends State<Register> {
 
     setState(() {
       _image = image;
+      showImageError = false;
     });
   }
 
@@ -371,372 +391,53 @@ class _RegisterState extends State<Register> {
   @override
   Widget build(BuildContext context) {
 
-//    List<Step> steps = [
-//      Step(
-//        title: const Text('Personal Details'),
-//        isActive: true,
-//        state: StepState.complete,
-//        content: Column(
-//          children: <Widget>[
-//            TextFormField(
-//              decoration: InputDecoration(
-//                  labelText: 'First Name',
-//                  icon: new Icon(
-//                    Icons.person,
-//                    color: Colors.grey,
-//                  )
-//              ),
-//              validator: (val) => val.isEmpty ? 'Enter your First Name' : null,
-//              onChanged: (val) {
-//                setState(() => fname = val);
-//              },
-//            ),
-//            TextFormField(
-//              decoration: InputDecoration(
-//                  labelText: 'Last Name',
-//                  icon: new Icon(
-//                    Icons.person,
-//                    color: Colors.grey,
-//                  )
-//              ),
-//              validator: (val) => val.isEmpty ? 'Enter your Last Name' : null,
-//              onChanged: (val) {
-//                setState(() => lname = val);
-//              },
-//            ),
-//            TextFormField(
-//              decoration: new InputDecoration(
-//                  labelText: 'Email',
-//                  icon: new Icon(
-//                    Icons.mail,
-//                    color: Colors.grey,
-//                  )),
-//              validator: (val) => val.isEmpty ? 'Enter an email' : null,
-//              onChanged: (val) {
-//                setState(() => email = val);
-//              },
-//            ),
-//          ],
-//        ),
-//      ),
-//      Step(
-//        isActive:true,
-//        state: StepState.editing,
-//        title: const Text('Contact Details'),
-//        content: Column(
-//          children: <Widget>[
-//            TextFormField(
-//              decoration: InputDecoration(
-//                  labelText: 'Address1',
-//                  icon: new Icon(
-//                    Icons.home,
-//                    color: Colors.grey,
-//                  )
-//              ),
-//              validator: (val) => val.isEmpty ? 'Enter your Address1' : null,
-//              onChanged: (val) {
-//                setState(() => address1 = val);
-//              },
-//            ),
-//            TextFormField(
-//              decoration: InputDecoration(
-//                  labelText: 'Address2',
-//                  icon: new Icon(
-//                    Icons.home,
-//                    color: Colors.grey,
-//                  )
-//              ),
-//              validator: (val) => val.isEmpty ? 'Enter your Address2' : null,
-//              onChanged: (val) {
-//                setState(() => address2 = val);
-//              },
-//            ),
-//            TextFormField(
-//              decoration: InputDecoration(
-//                  labelText: 'City',
-//                  icon: new Icon(
-//                    Icons.location_city,
-//                    color: Colors.grey,
-//                  )
-//              ),
-//              validator: (val) => val.isEmpty ? 'Enter City' : null,
-//              onChanged: (val) {
-//                setState(() => city = val);
-//              },
-//            ),
-//            TextFormField(
-//              decoration: new InputDecoration(
-//                  labelText: "Pin Code",
-//                  icon: new Icon(
-//                    Icons.code,
-//                    color: Colors.grey,
-//                  )
-//
-//              ),
-//              keyboardType: TextInputType.number,
-//              maxLength: 6,
-//              validator: (val) => val.isEmpty || val.length<6 ? 'Enter valid Pin Code' : null,
-//              onChanged: (val) {
-//                setState(() => pincode = val);
-//              },
-//            ),
-//            TextFormField(
-//              decoration: InputDecoration(
-//                  labelText: 'Phone No.',
-//                  icon: new Icon(
-//                    Icons.phone,
-//                    color: Colors.grey,
-//                  )
-//              ),
-//              keyboardType: TextInputType.phone,
-//              maxLength:10 ,
-//              validator: (val) => val.isEmpty ? 'Enter your Phone No' : null,
-//              onChanged: (val) {
-//                setState(() =>  phone= val);
-//              },
-//            ),
-//          ],
-//        ),
-//      ),
-//      Step(
-//        isActive: true,
-//        state: StepState.editing,
-//        title: const Text('Profile Picture'),
-//        content: Column(
-//          children: <Widget>[
-//            Center(
-//              child: _image == null
-//                  ? Text('No image selected.')
-//                  : Image(image: FileImage(_image),height: 150,width: 150,),
-//            ),
-//            FloatingActionButton(
-//              onPressed: getImage,
-//              tooltip: 'Pick Image',
-//              child: Icon(Icons.add_a_photo),
-//            ),
-//          ],
-//        ),
-//      ),
-//      Step(
-//        isActive:true,
-//        state: StepState.editing,
-//        title: const Text('Set Password'),
-//        content: Column(
-//          children: <Widget>[
-//            TextFormField(
-//              decoration: new InputDecoration(
-//                  labelText: 'Password',
-//                  icon: new Icon(
-//                    Icons.lock,
-//                    color: Colors.grey,
-//                  )),
-//              obscureText: true,
-//              validator: (val) => val.length < 6 ? 'Enter a password 6+ chars long' : null,
-//              onChanged: (val) {
-//                setState(() =>  password= val);
-//              },
-//            ), TextFormField(
-//              decoration: new InputDecoration(
-//                  labelText: 'Confirm Password',
-//                  icon: new Icon(
-//                    Icons.lock,
-//                    color: Colors.grey,
-//                  )),
-//              obscureText: true,
-//              validator: (val) => password!=val? 'Password Does Not Match!' : null,
-//              onChanged: (val) {
-//                setState(() =>  cpassword= val);
-//              },
-//            ),
-//          ],
-//        ),
-//      ),
-//    ]; List<Step> steps = [
-//      Step(
-//        title: const Text('Personal Details'),
-//        isActive: true,
-//        state: StepState.complete,
-//        content: Column(
-//          children: <Widget>[
-//            TextFormField(
-//              decoration: InputDecoration(
-//                  labelText: 'First Name',
-//                  icon: new Icon(
-//                    Icons.person,
-//                    color: Colors.grey,
-//                  )
-//              ),
-//              validator: (val) => val.isEmpty ? 'Enter your First Name' : null,
-//              onChanged: (val) {
-//                setState(() => fname = val);
-//              },
-//            ),
-//            TextFormField(
-//              decoration: InputDecoration(
-//                  labelText: 'Last Name',
-//                  icon: new Icon(
-//                    Icons.person,
-//                    color: Colors.grey,
-//                  )
-//              ),
-//              validator: (val) => val.isEmpty ? 'Enter your Last Name' : null,
-//              onChanged: (val) {
-//                setState(() => lname = val);
-//              },
-//            ),
-//            TextFormField(
-//              decoration: new InputDecoration(
-//                  labelText: 'Email',
-//                  icon: new Icon(
-//                    Icons.mail,
-//                    color: Colors.grey,
-//                  )),
-//              validator: (val) => val.isEmpty ? 'Enter an email' : null,
-//              onChanged: (val) {
-//                setState(() => email = val);
-//              },
-//            ),
-//          ],
-//        ),
-//      ),
-//      Step(
-//        isActive:true,
-//        state: StepState.editing,
-//        title: const Text('Contact Details'),
-//        content: Column(
-//          children: <Widget>[
-//            TextFormField(
-//              decoration: InputDecoration(
-//                  labelText: 'Address1',
-//                  icon: new Icon(
-//                    Icons.home,
-//                    color: Colors.grey,
-//                  )
-//              ),
-//              validator: (val) => val.isEmpty ? 'Enter your Address1' : null,
-//              onChanged: (val) {
-//                setState(() => address1 = val);
-//              },
-//            ),
-//            TextFormField(
-//              decoration: InputDecoration(
-//                  labelText: 'Address2',
-//                  icon: new Icon(
-//                    Icons.home,
-//                    color: Colors.grey,
-//                  )
-//              ),
-//              validator: (val) => val.isEmpty ? 'Enter your Address2' : null,
-//              onChanged: (val) {
-//                setState(() => address2 = val);
-//              },
-//            ),
-//            TextFormField(
-//              decoration: InputDecoration(
-//                  labelText: 'City',
-//                  icon: new Icon(
-//                    Icons.location_city,
-//                    color: Colors.grey,
-//                  )
-//              ),
-//              validator: (val) => val.isEmpty ? 'Enter City' : null,
-//              onChanged: (val) {
-//                setState(() => city = val);
-//              },
-//            ),
-//            TextFormField(
-//              decoration: new InputDecoration(
-//                  labelText: "Pin Code",
-//                  icon: new Icon(
-//                    Icons.code,
-//                    color: Colors.grey,
-//                  )
-//
-//              ),
-//              keyboardType: TextInputType.number,
-//              maxLength: 6,
-//              validator: (val) => val.isEmpty || val.length<6 ? 'Enter valid Pin Code' : null,
-//              onChanged: (val) {
-//                setState(() => pincode = val);
-//              },
-//            ),
-//            TextFormField(
-//              decoration: InputDecoration(
-//                  labelText: 'Phone No.',
-//                  icon: new Icon(
-//                    Icons.phone,
-//                    color: Colors.grey,
-//                  )
-//              ),
-//              keyboardType: TextInputType.phone,
-//              maxLength:10 ,
-//              validator: (val) => val.isEmpty ? 'Enter your Phone No' : null,
-//              onChanged: (val) {
-//                setState(() =>  phone= val);
-//              },
-//            ),
-//          ],
-//        ),
-//      ),
-//      Step(
-//        isActive: true,
-//        state: StepState.editing,
-//        title: const Text('Profile Picture'),
-//        content: Column(
-//          children: <Widget>[
-//            Center(
-//              child: _image == null
-//                  ? Text('No image selected.')
-//                  : Image(image: FileImage(_image),height: 150,width: 150,),
-//            ),
-//            FloatingActionButton(
-//              onPressed: getImage,
-//              tooltip: 'Pick Image',
-//              child: Icon(Icons.add_a_photo),
-//            ),
-//          ],
-//        ),
-//      ),
-//      Step(
-//        isActive:true,
-//        state: StepState.editing,
-//        title: const Text('Set Password'),
-//        content: Column(
-//          children: <Widget>[
-//            TextFormField(
-//              decoration: new InputDecoration(
-//                  labelText: 'Password',
-//                  icon: new Icon(
-//                    Icons.lock,
-//                    color: Colors.grey,
-//                  )),
-//              obscureText: true,
-//              validator: (val) => val.length < 6 ? 'Enter a password 6+ chars long' : null,
-//              onChanged: (val) {
-//                setState(() =>  password= val);
-//              },
-//            ), TextFormField(
-//              decoration: new InputDecoration(
-//                  labelText: 'Confirm Password',
-//                  icon: new Icon(
-//                    Icons.lock,
-//                    color: Colors.grey,
-//                  )),
-//              obscureText: true,
-//              validator: (val) => password!=val? 'Password Does Not Match!' : null,
-//              onChanged: (val) {
-//                setState(() =>  cpassword= val);
-//              },
-//            ),
-//          ],
-//        ),
-//      ),
-//    ];
-
     List<Step> _stepList=_createSteps(context);
+    Future<String> uploadImage(BuildContext context,String uid) async{
+      String fileName=uid+"-"+basename(_image.path);
+      StorageReference firebaseStorageRef = FirebaseStorage.instance.ref().child(fileName);
+      StorageUploadTask uploadTask = firebaseStorageRef.putFile(_image);
+      StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
+      String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+      return downloadUrl;
+    }
 
-    return new Scaffold(
-//        backgroundColor: Colors.blue[100],
+    void _submit() async{
+      setState(() => loading = true);
+      if(_formKey.currentState.validate()){
+        setState(() => loading = true);
+        if(_image != null) {
+          _formKey.currentState.save();
+//          dynamic result = await _auth.registerWithEmailAndPassword(email, password);
+
+           _auth.registerWithEmailAndPassword(email, password).then((result) async{
+             if(result is String) {
+               setState(() {
+                 loading = false;
+                 error =result;
+               });
+             }else{
+
+               await uploadImage(context,result.uid).then((imageUrl){
+                 DatabaseService().addOwnerData(fname,lname,email,phone,address1,address2,city,pincode,imageUrl).then((value){
+                   loading = false;
+                   print(value);
+                 });
+               });
+
+             }
+           });
+
+        }
+      }
+      if(_image == null) {
+        setState((){
+          showImageError = true;
+          loading=false;
+        });
+      }
+    }
+
+    return loading?Loading(): Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[400],
         elevation: 0.0,
@@ -787,7 +488,6 @@ class _RegisterState extends State<Register> {
                   if (_current < _stepList.length - 1) {
                     _current++;
                   } else {
-                    _current = _stepList.length - 1;
                     _submit();
                   }
                   //_setStep(context);
@@ -813,21 +513,16 @@ class _RegisterState extends State<Register> {
 
           ),
           ),
+           SizedBox(height: 12.0),
+                Text(
+                  error,
+                  style: TextStyle(color: Colors.red, fontSize: 14.0),
+                ),
         ]
         )
     );
   }
 
-  void _submit() async{
-    if(_formKey.currentState.validate()){
-                        setState(() => loading = true);
-                        dynamic result = await _auth.registerWithEmailAndPassword(email, password);
-                        if(result is String) {
-                          setState(() {
-                            loading = false;
-                            error =result;
-                          });
-                        }
-                      }
-  }
+
+
 }
