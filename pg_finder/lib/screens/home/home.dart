@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pg_finder/services/auth.dart';
+import 'package:pg_finder/screens/owner/addDeatails.dart';
 
 class HomePage extends StatefulWidget{
   State<StatefulWidget> createState(){
@@ -31,7 +32,12 @@ class _HomePageState extends State<HomePage> {
                   icon: new Icon(Icons.add_box),
                   iconSize: 50,
                   color: Colors.white,
-                  onPressed: null
+                  onPressed: (){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => OwnerDetailsFormPage()),
+                    );
+                  }
               ),
               new IconButton(
                 icon: new Icon(Icons.exit_to_app),

@@ -26,7 +26,7 @@ class _SignInState extends State<SignIn> {
   @override
   Widget build(BuildContext context) {
     return loading ? Loading() : Scaffold(
-      backgroundColor: Colors.blue[100],
+//      backgroundColor: Colors.blue[100],
       appBar: AppBar(
         backgroundColor: Colors.blue[400],
         elevation: 0.0,
@@ -52,7 +52,6 @@ class _SignInState extends State<SignIn> {
                 TextFormField(
                   decoration: new InputDecoration(
                       labelText: 'Email',
-                      hintText: 'Email',
                       icon: new Icon(
                         Icons.mail,
                         color: Colors.grey,
@@ -66,7 +65,6 @@ class _SignInState extends State<SignIn> {
                 TextFormField(
                   decoration: new InputDecoration(
                       labelText: 'Password',
-                      hintText: 'Password',
                       icon: new Icon(
                         Icons.lock,
                         color: Colors.grey,
@@ -110,3 +108,5 @@ class _SignInState extends State<SignIn> {
     );
   }
 }
+
+
